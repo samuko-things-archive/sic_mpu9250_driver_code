@@ -23,17 +23,14 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef MPU9250_SPI_H_
-#define MPU9250_SPI_H_
+#ifndef INVENSENSE_MPU9250_SPI_H_
+#define INVENSENSE_MPU9250_SPI_H_
 
 #include <Arduino.h>
 #include "SPI.h"
 
 namespace bfs
 {
-
-
-
   class InvensenseImuSpi
   {
   public:
@@ -55,8 +52,6 @@ namespace bfs
     /* SPI flag to indicate a read operation */
     static constexpr uint8_t SPI_READ_ = 0x80;
   };
-
-
 
 
   class Mpu9250
@@ -231,4 +226,4 @@ namespace bfs
 
 } // namespace bfs
 
-#endif // INVENSENSE_IMU_SRC_MPU9250_H_ NOLINT
+#endif // INVENSENSE_MPU9250_SPI_H_ NOLINT

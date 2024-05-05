@@ -23,11 +23,9 @@
 * IN THE SOFTWARE.
 */
 
-#include "mpu9250_spi.h"  // NOLINT
+#include "invensense_mpu9250_spi.h"  // NOLINT
 #include <Arduino.h>
 #include "SPI.h"
-
-
 
 
 namespace bfs {

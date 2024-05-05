@@ -1,4 +1,4 @@
-#include "mpu9250_spi.h"
+#include "invensense_mpu9250_spi.h"
 #include "vectlab.h"
 
 #include "serial_i2c_comm_api.h"
