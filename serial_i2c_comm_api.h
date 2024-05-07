@@ -628,6 +628,21 @@ void i2cSlaveReceiveData(int dataSizeInBytes)
     i2c_msg = sendCalAccData();
   }
 
+  else if (i2cDataBuffer[0] == "gyro-var")
+  {
+    i2c_msg = sendRateVariance();
+  }
+
+  else if (i2cDataBuffer[0] == "rpy-var")
+  {
+    i2c_msg = sendAngleVariance();
+  }
+
+  else if (i2cDataBuffer[0] == "acc-var")
+  {
+    i2c_msg = sendAccVariance();
+  }
+
   i2cMsg = "";
   i2cMsgBuffer = "";
   i2cDataBuffer[0] = "";
