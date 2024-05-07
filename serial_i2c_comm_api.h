@@ -236,6 +236,33 @@ String sendAccVariance(){
   return data;
 }
 
+String sendAngleVariance2(){
+  String data = String(roll_variance, 6);
+  data += ",";
+  data += String(pitch_variance, 6);
+  data += ",";
+  data += String(yaw_variance, 6);
+  return data;
+}
+
+String sendRateVariance2(){
+  String data = String(roll_rate_variance, 6);
+  data += ",";
+  data += String(pitch_rate_variance, 6);
+  data += ",";
+  data += String(yaw_rate_variance, 6);
+  return data;
+}
+
+String sendAccVariance2(){
+  String data = String(accx_variance, 6);
+  data += ",";
+  data += String(accy_variance, 6);
+  data += ",";
+  data += String(accz_variance, 6);
+  return data;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -553,7 +580,7 @@ void serialReceiveAndSendData()
 
 String i2c_msg = "";
 
-String i2cMsg = "", i2cMsgBuffer, i2cDataBuffer[5];
+String i2cMsg = "", i2cMsgBuffer, i2cDataBuffer[4];
 
 void i2cSlaveSendData()
 {
@@ -613,12 +640,7 @@ void i2cSlaveReceiveData(int dataSizeInBytes)
     i2c_msg = sendRPY();
   }
 
-  else if (i2cDataBuffer[0] == "quat")
-  {
-    i2c_msg = sendRPY();
-  }
-
-  else if (i2cDataBuffer[0] == "rpy-rate")
+  else if (i2cDataBuffer[0] == "gyro-cal")
   {
     i2c_msg = sendCalGyroData();
   }
@@ -630,17 +652,17 @@ void i2cSlaveReceiveData(int dataSizeInBytes)
 
   else if (i2cDataBuffer[0] == "gyro-var")
   {
-    i2c_msg = sendRateVariance();
+    i2c_msg = sendRateVariance2();
   }
 
   else if (i2cDataBuffer[0] == "rpy-var")
   {
-    i2c_msg = sendAngleVariance();
+    i2c_msg = sendAngleVariance2();
   }
 
   else if (i2cDataBuffer[0] == "acc-var")
   {
-    i2c_msg = sendAccVariance();
+    i2c_msg = sendAccVariance2();
   }
 
   i2cMsg = "";
@@ -649,7 +671,6 @@ void i2cSlaveReceiveData(int dataSizeInBytes)
   i2cDataBuffer[1] = "";
   i2cDataBuffer[2] = "";
   i2cDataBuffer[3] = "";
-  i2cDataBuffer[4] = "";
 
   offLed0();
 }
