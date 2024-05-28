@@ -421,48 +421,48 @@ void serialReceiveAndSendData()
 
       /////////////// FUNCTION CALLS /////////////////////
 
-      if (serDataBuffer[0] == "acc-raw")
+      if (serDataBuffer[0] == "/acc-raw")
       {
         ser_msg = sendRawAccData();
       }
-      else if (serDataBuffer[0] == "acc-off") {
+      else if (serDataBuffer[0] == "/acc-off") {
         if (serDataBuffer[1]=="") ser_msg = sendOffAccData();
         else ser_msg = updateAccOffset(serDataBuffer[1].toFloat(), serDataBuffer[2].toFloat(), serDataBuffer[3].toFloat());
         Serial.println(ser_msg);
         ser_msg = "";
       }
-      else if (serDataBuffer[0] == "acc-cal")
+      else if (serDataBuffer[0] == "/acc-cal")
       {
         ser_msg = sendCalAccData();
       }
 
 
-      else if (serDataBuffer[0] == "gyro-raw")
+      else if (serDataBuffer[0] == "/gyro-raw")
       {
         ser_msg = sendRawGyroData();
       }
-      else if (serDataBuffer[0] == "gyro-off") {
+      else if (serDataBuffer[0] == "/gyro-off") {
         if (serDataBuffer[1]=="") ser_msg = sendOffGyroData();
         else ser_msg = updateGyroOffset(serDataBuffer[1].toFloat(), serDataBuffer[2].toFloat(), serDataBuffer[3].toFloat());
         Serial.println(ser_msg);
         ser_msg = "";
       }
-      else if (serDataBuffer[0] == "gyro-cal")
+      else if (serDataBuffer[0] == "/gyro-cal")
       {
         ser_msg = sendCalGyroData();
       }
 
 
-      else if (serDataBuffer[0] == "mag-raw")
+      else if (serDataBuffer[0] == "/mag-raw")
       {
         ser_msg = sendRawMagData();
       }
-      else if (serDataBuffer[0] == "mag-cal")
+      else if (serDataBuffer[0] == "/mag-cal")
       {
         ser_msg = sendCalMagData();
       }
 
-      else if (serDataBuffer[0] == "bvect") {
+      else if (serDataBuffer[0] == "/bvect") {
         if (serDataBuffer[1]=="") ser_msg = sendBvectMagData();
         else ser_msg = updateBvect(serDataBuffer[1].toFloat(), serDataBuffer[2].toFloat(), serDataBuffer[3].toFloat());
         Serial.println(ser_msg);
@@ -470,21 +470,21 @@ void serialReceiveAndSendData()
       }
 
 
-      else if (serDataBuffer[0] == "amatR0") {
+      else if (serDataBuffer[0] == "/amatR0") {
         if (serDataBuffer[1]=="") ser_msg = sendAmatR0();
         else ser_msg = updateAmatR0(serDataBuffer[1].toFloat(), serDataBuffer[2].toFloat(), serDataBuffer[3].toFloat());
         Serial.println(ser_msg);
         ser_msg = "";
       }
 
-      else if (serDataBuffer[0] == "amatR1") {
+      else if (serDataBuffer[0] == "/amatR1") {
         if (serDataBuffer[1]=="") ser_msg = sendAmatR1();
         else ser_msg = updateAmatR1(serDataBuffer[1].toFloat(), serDataBuffer[2].toFloat(), serDataBuffer[3].toFloat());
         Serial.println(ser_msg);
         ser_msg = "";
       }
 
-      else if (serDataBuffer[0] == "amatR2") {
+      else if (serDataBuffer[0] == "/amatR2") {
         if (serDataBuffer[1]=="") ser_msg = sendAmatR2();
         else ser_msg = updateAmatR2(serDataBuffer[1].toFloat(), serDataBuffer[2].toFloat(), serDataBuffer[3].toFloat());
         Serial.println(ser_msg);
@@ -493,7 +493,7 @@ void serialReceiveAndSendData()
 
 
 
-      else if (serDataBuffer[0] == "gyro-var") {
+      else if (serDataBuffer[0] == "/gyro-var") {
         if (serDataBuffer[1]=="") ser_msg = sendRateVariance();
         else ser_msg = updateRateVariance(serDataBuffer[1].toFloat(), serDataBuffer[2].toFloat(), serDataBuffer[3].toFloat());
         Serial.println(ser_msg);
@@ -502,7 +502,7 @@ void serialReceiveAndSendData()
 
 
 
-      else if (serDataBuffer[0] == "acc-var") {
+      else if (serDataBuffer[0] == "/acc-var") {
         if (serDataBuffer[1]=="") ser_msg = sendAccVariance();
         else ser_msg = updateAccVariance(serDataBuffer[1].toFloat(), serDataBuffer[2].toFloat(), serDataBuffer[3].toFloat());
         Serial.println(ser_msg);
@@ -511,35 +511,35 @@ void serialReceiveAndSendData()
 
 
 
-      else if (serDataBuffer[0] == "reset") {
+      else if (serDataBuffer[0] == "/reset") {
         ser_msg = resetEEPROM();
       }
 
 
 
-      else if (serDataBuffer[0] == "rpy")
+      else if (serDataBuffer[0] == "/rpy")
       {
         ser_msg = sendRPY();
       }
-      else if (serDataBuffer[0] == "quat")
+      else if (serDataBuffer[0] == "/quat")
       {
         ser_msg = sendQuat();
       }
  
-      else if (serDataBuffer[0] == "rpy-var") {
+      else if (serDataBuffer[0] == "/rpy-var") {
         if (serDataBuffer[1]=="") ser_msg = sendAngleVariance();
         else ser_msg = updateAngleVariance(serDataBuffer[1].toFloat(), serDataBuffer[2].toFloat(), serDataBuffer[3].toFloat());
         Serial.println(ser_msg);
         ser_msg = "";
       }
 
-      else if (serDataBuffer[0] == "gain") {
+      else if (serDataBuffer[0] == "/gain") {
         if (serDataBuffer[1]=="") ser_msg = sendFilterGain();
         else ser_msg = updateFilterGain(serDataBuffer[1].toFloat());
         Serial.println(ser_msg);
         ser_msg = "";
       }
-      else if (serDataBuffer[0] == "i2c") {
+      else if (serDataBuffer[0] == "/i2c") {
         if (serDataBuffer[1]=="") ser_msg = sendI2CADDRESS();
         else ser_msg = updateI2CADDRESS(constrain(serDataBuffer[1].toInt(), 0, 127));
         Serial.println(ser_msg);
@@ -635,32 +635,32 @@ void i2cSlaveReceiveData(int dataSizeInBytes)
     } while (indexPos >= 0);
   }
 
-  if (i2cDataBuffer[0] == "rpy")
+  if (i2cDataBuffer[0] == "/rpy")
   {
     i2c_msg = sendRPY();
   }
 
-  else if (i2cDataBuffer[0] == "gyro-cal")
+  else if (i2cDataBuffer[0] == "/gyro-cal")
   {
     i2c_msg = sendCalGyroData();
   }
 
-  else if (i2cDataBuffer[0] == "acc-cal")
+  else if (i2cDataBuffer[0] == "/acc-cal")
   {
     i2c_msg = sendCalAccData();
   }
 
-  else if (i2cDataBuffer[0] == "gyro-var")
+  else if (i2cDataBuffer[0] == "/gyro-var")
   {
     i2c_msg = sendRateVariance2();
   }
 
-  else if (i2cDataBuffer[0] == "rpy-var")
+  else if (i2cDataBuffer[0] == "/rpy-var")
   {
     i2c_msg = sendAngleVariance2();
   }
 
-  else if (i2cDataBuffer[0] == "acc-var")
+  else if (i2cDataBuffer[0] == "/acc-var")
   {
     i2c_msg = sendAccVariance2();
   }
