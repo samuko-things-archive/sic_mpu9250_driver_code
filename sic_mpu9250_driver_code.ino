@@ -1,14 +1,13 @@
 #include "invensense_mpu9250_spi.h"
 #include "vectlab.h"
 
+#include <Wire.h>
 #include "serial_i2c_comm_api.h"
-
 
 float MicroTeslaToTesla(float mT)
 {
   return mT * 1000000;
 }
-
 
 /* Mpu9250 object, SPI bus, CS on pin 10 */
 bfs::Mpu9250 imu(&SPI, 10);
@@ -20,7 +19,7 @@ void setup()
 {
   /* Serial to display data */
   Serial.begin(115200);
-  Serial.setTimeout(2);
+  Serial.setTimeout(4);
 
   initLed0();
   initLed1();
@@ -58,12 +57,12 @@ void setup()
   updateGlobalParamsFromEERPOM();
   /////////////////////////////////////////////
 
-  Wire.begin(i2cAddress);                
-  Wire.onReceive(i2cSlaveReceiveData);
-  Wire.onRequest(i2cSlaveSendData);
+  Wire.begin(i2cAddress);
+  Wire.onReceive(i2cReceiveDataEvent);
+  Wire.onRequest(i2cSendDataEvent);
 
   madgwickFilter.setAlgorithmGain(filterGain);
-  
+
   onLed0();
   delay(800);
   offLed0();
@@ -74,7 +73,6 @@ void setup()
 
   serialCommTime = millis();
   readImuTime = millis();
-
 }
 
 void loop()
@@ -139,12 +137,12 @@ void loop()
       mag_vect[2] = mzRaw;
 
       // mag_vect = mag_vect - b_vect
-      mag_vect[0] = mag_vect[0]-b_vect[0];
-      mag_vect[1] = mag_vect[1]-b_vect[1];
-      mag_vect[2] = mag_vect[2]-b_vect[2];
+      mag_vect[0] = mag_vect[0] - b_vect[0];
+      mag_vect[1] = mag_vect[1] - b_vect[1];
+      mag_vect[2] = mag_vect[2] - b_vect[2];
 
       // mag_vect = A_mat * mag_vect
-      vectOp.transform(mag_vect, A_mat, mag_vect); 
+      vectOp.transform(mag_vect, A_mat, mag_vect);
 
       mxCal = mag_vect[0];
       myCal = mag_vect[1];
@@ -169,9 +167,8 @@ void loop()
       madgwickFilter.getOrientationRPY(roll, pitch, yaw);
       madgwickFilter.getOrientationQuat(qw, qx, qy, qz);
       //----------------------------------------------------//
-      
     }
 
-    readImuTime = millis(); 
+    readImuTime = millis();
   }
 }
