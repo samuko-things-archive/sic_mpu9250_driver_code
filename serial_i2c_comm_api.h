@@ -304,87 +304,40 @@ void serialReceiveAndSendData()
 }
 //////////////////////////////////////////////////////////////////////////
 
-///////////////// I2C COMMUNICATION //////////////////////
+
+
+//----------------- I2C COMMUNICATION -----------------//
 
 String i2c_msg = "";
 
 String i2cMsg = "", i2cMsgBuffer, i2cDataBuffer[4];
 
-//-----------------------------------------------------//
-
-void saveData(String data_address)
+void i2cSlaveSendData()
 {
-  if (data_address == "/gain")
+  String msg = "";
+  if (i2c_msg != "")
   {
-    updateSerialData1(GAIN_EEPROM_ADDRESS,
-                      i2cDataBuffer[1].toFloat(),
-                      filterGain);
+    msg = i2c_msg;
+    i2c_msg = "";
   }
+  else
+  {
+    msg = "0";
+    i2c_msg = "";
+  }
+  char charArray[msg.length() + 1];
+  msg.toCharArray(charArray, msg.length() + 1);
+  Wire.write(charArray, msg.length());
 }
 
-void getData(String data_address)
+void i2cSlaveReceiveData(int dataSizeInBytes)
 {
-  if (data_address == "/gain")
-  {
-    i2c_msg = sendSerialData1(filterGain, 3);
-  }
-  else if (data_address == "/acc-cal")
-  {
-    i2c_msg = sendSerialData3(axCal, ayCal, azCal, 4);
-  }
-  else if (data_address == "/gyr-cal")
-  {
-    i2c_msg = sendSerialData3(gxCal, gyCal, gzCal, 4);
-  }
-  else if (data_address == "/rpy")
-  {
-    i2c_msg = sendSerialData3(roll, pitch, yaw, 4);
-  }
-  else if (data_address == "/r-var")
-  {
-    i2c_msg = sendSerialData1(roll_variance, 10);
-  }
-  else if (data_address == "/p-var")
-  {
-    i2c_msg = sendSerialData1(pitch_variance, 10);
-  }
-  else if (data_address == "/y-var")
-  {
-    i2c_msg = sendSerialData1(yaw_variance, 10);
-  }
-  else if (data_address == "/ax-var")
-  {
-    i2c_msg = sendSerialData1(axVar, 10);
-  }
-  else if (data_address == "/ay-var")
-  {
-    i2c_msg = sendSerialData1(ayVar, 10);
-  }
-  else if (data_address == "/az-var")
-  {
-    i2c_msg = sendSerialData1(azVar, 10);
-  }
-  else if (data_address == "/gx-var")
-  {
-    i2c_msg = sendSerialData1(axVar, 10);
-  }
-  else if (data_address == "/gy-var")
-  {
-    i2c_msg = sendSerialData1(ayVar, 10);
-  }
-  else if (data_address == "/gz-var")
-  {
-    i2c_msg = sendSerialData1(azVar, 10);
-  }
-}
 
-void i2cReceiveDataEvent(int dataSizeInBytes)
-{
   onLed0();
 
   int indexPos = 0, i = 0;
 
-  for (int j = 0; j < dataSizeInBytes; j += 1)
+  for (int i = 0; i < dataSizeInBytes; i += 1)
   {
     char c = Wire.read();
     i2cMsg += c;
@@ -413,42 +366,75 @@ void i2cReceiveDataEvent(int dataSizeInBytes)
     } while (indexPos >= 0);
   }
 
-  if (i2cDataBuffer[1] != "")
+  if (i2cDataBuffer[0] == "/gain")
   {
-    saveData(i2cDataBuffer[0]);
-
-    i2cMsg = "";
-    i2cMsgBuffer = "";
-    i2cDataBuffer[0] = "";
-    i2cDataBuffer[1] = "";
-    i2cDataBuffer[2] = "";
-    i2cDataBuffer[3] = "";
+    if (i2cDataBuffer[1] == "")
+      i2c_msg = sendSerialData1(filterGain, 3);
+    else
+      i2c_msg = updateSerialData1(GAIN_EEPROM_ADDRESS,
+                                  i2cDataBuffer[1].toFloat(),
+                                  filterGain);
+  }
+  else if (i2cDataBuffer[0] == "/acc-cal")
+  {
+    i2c_msg = sendSerialData3(axCal, ayCal, azCal, 4);
+  }
+  else if (i2cDataBuffer[0] == "/gyr-cal")
+  {
+    i2c_msg = sendSerialData3(gxCal, gyCal, gzCal, 4);
+  }
+  else if (i2cDataBuffer[0] == "/rpy")
+  {
+    i2c_msg = sendSerialData3(roll, pitch, yaw, 4);
+  }
+  else if (i2cDataBuffer[0] == "/r-var")
+  {
+    i2c_msg = sendSerialData1(roll_variance, 10);
+  }
+  else if (i2cDataBuffer[0] == "/p-var")
+  {
+    i2c_msg = sendSerialData1(pitch_variance, 10);
+  }
+  else if (i2cDataBuffer[0] == "/y-var")
+  {
+    i2c_msg = sendSerialData1(yaw_variance, 10);
+  }
+  else if (i2cDataBuffer[0] == "/ax-var")
+  {
+    i2c_msg = sendSerialData1(axVar, 10);
+  }
+  else if (i2cDataBuffer[0] == "/ay-var")
+  {
+    i2c_msg = sendSerialData1(ayVar, 10);
+  }
+  else if (i2cDataBuffer[0] == "/az-var")
+  {
+    i2c_msg = sendSerialData1(azVar, 10);
+  }
+  else if (i2cDataBuffer[0] == "/gx-var")
+  {
+    i2c_msg = sendSerialData1(axVar, 10);
+  }
+  else if (i2cDataBuffer[0] == "/gy-var")
+  {
+    i2c_msg = sendSerialData1(ayVar, 10);
+  }
+  else if (i2cDataBuffer[0] == "/gz-var")
+  {
+    i2c_msg = sendSerialData1(azVar, 10);
   }
 
-  offLed0();
-}
-
-void i2cSendDataEvent()
-{
-  onLed0();
-  getData(i2cDataBuffer[0]);
-
-  // Send response back to Master
-  char charArray[i2c_msg.length() + 1];
-  i2c_msg.toCharArray(charArray, i2c_msg.length() + 1);
-
-  Wire.write(charArray);
-
-  i2c_msg = "";
   i2cMsg = "";
   i2cMsgBuffer = "";
   i2cDataBuffer[0] = "";
   i2cDataBuffer[1] = "";
   i2cDataBuffer[2] = "";
   i2cDataBuffer[3] = "";
+
   offLed0();
 }
-//-----------------------------------------------------//
+
+/////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////
 

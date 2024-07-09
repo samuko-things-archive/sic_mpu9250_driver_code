@@ -58,8 +58,8 @@ void setup()
   /////////////////////////////////////////////
 
   Wire.begin(i2cAddress);
-  Wire.onReceive(i2cReceiveDataEvent);
-  Wire.onRequest(i2cSendDataEvent);
+  Wire.onReceive(i2cSlaveReceiveData);
+  Wire.onRequest(i2cSlaveSendData);
 
   madgwickFilter.setAlgorithmGain(filterGain);
 
