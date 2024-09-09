@@ -154,8 +154,17 @@ void serialReceiveAndSendData()
           ser_msg = sendSerialData1(i2cAddress, 0);
         else
           ser_msg = updateSerialData1(I2C_EEPROM_ADDRESS,
-                                      serDataBuffer[1].toFloat(),
+                                      serDataBuffer[1].toInt(),
                                       i2cAddress);
+      }
+      else if (serDataBuffer[0] == "/frame-id")
+      {
+        if (serDataBuffer[1] == "")
+          ser_msg = sendSerialData1(worldFrameId, 0);
+        else
+          ser_msg = updateSerialData1(FRAME_ID_EEPROM_ADDRESS,
+                                      serDataBuffer[1].toInt(),
+                                      worldFrameId);
       }
       else if (serDataBuffer[0] == "/acc-raw")
       {
@@ -304,8 +313,6 @@ void serialReceiveAndSendData()
 }
 //////////////////////////////////////////////////////////////////////////
 
-
-
 //----------------- I2C COMMUNICATION -----------------//
 
 String i2c_msg = "";
@@ -368,12 +375,11 @@ void i2cSlaveReceiveData(int dataSizeInBytes)
 
   if (i2cDataBuffer[0] == "/gain")
   {
-    if (i2cDataBuffer[1] == "")
-      i2c_msg = sendSerialData1(filterGain, 3);
-    else
-      i2c_msg = updateSerialData1(GAIN_EEPROM_ADDRESS,
-                                  i2cDataBuffer[1].toFloat(),
-                                  filterGain);
+    i2c_msg = sendSerialData1(filterGain, 3);
+  }
+  else if (i2cDataBuffer[0] == "/frame-id")
+  {
+    i2c_msg = sendSerialData1(worldFrameId, 0);
   }
   else if (i2cDataBuffer[0] == "/acc-cal")
   {
@@ -434,8 +440,6 @@ void i2cSlaveReceiveData(int dataSizeInBytes)
   offLed0();
 }
 
-/////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////
+//-----------------------------------------------------//
 
 #endif

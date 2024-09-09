@@ -62,6 +62,7 @@ void setup()
   Wire.onRequest(i2cSlaveSendData);
 
   madgwickFilter.setAlgorithmGain(filterGain);
+  madgwickFilter.setWorldFrameId(worldFrameId); // 0 - NWU,  1 - ENU,  2 - NED
 
   onLed0();
   delay(800);
@@ -91,46 +92,82 @@ void loop()
 
     if (imu.Read())
     {
-      //------------READ ACC DATA AND CALIBRATE---------------//
+      //------------READ SENSOR DATA IN NED FRAME---------------//
       float ax = imu.accel_x_mps2();
       float ay = imu.accel_y_mps2();
       float az = imu.accel_z_mps2();
 
-      // convert NED frame to NWU frame
-      axRaw = ax * 1.00;
-      ayRaw = ay * -1.00;
-      azRaw = az * -1.00;
-
-      axCal = axRaw - axOff;
-      ayCal = ayRaw - ayOff;
-      azCal = azRaw - azOff;
-      //------------------------------------------------------//
-
-      //-----------READ GYRO DATA AND CALIBRATE---------------//
       float gx = imu.gyro_x_radps();
       float gy = imu.gyro_y_radps();
       float gz = imu.gyro_z_radps();
 
-      // convert NED frame to NWU frame
-      gxRaw = gx * 1.00;
-      gyRaw = gy * -1.00;
-      gzRaw = gz * -1.00;
-
-      gxCal = gxRaw - gxOff;
-      gyCal = gyRaw - gyOff;
-      gzCal = gzRaw - gzOff;
-      //-----------------------------------------------------//
-
-      //-----------READ MAG DATA AND CALIBRATE---------------//
       float mx = imu.mag_x_ut();
       float my = imu.mag_y_ut();
       float mz = imu.mag_z_ut();
+      //--------------------------------------------------------//
 
-      // convert NED frame to NWU frame
-      mxRaw = mx * 1.00;
-      myRaw = my * -1.00;
-      mzRaw = mz * -1.00;
+      //------------CONVERT SENSOR DATA FROM NED FRAME TO OTHER FRAME---------------//
+      switch (worldFrameId)
+      {
+      // convert sensor data from NED frame to NED frame - 2
+      case 2: // NED
+        axRaw = ax;
+        ayRaw = ay;
+        azRaw = az;
 
+        gxRaw = gx;
+        gyRaw = gy;
+        gzRaw = gz;
+
+        mxRaw = mx;
+        myRaw = my;
+        mzRaw = mz;
+        break;
+
+      // convert sensor data from NED frame to ENU frame - 1
+      case 1: // ENU
+        axRaw = ay;
+        ayRaw = ax;
+        azRaw = az * -1.00;
+
+        gxRaw = gy;
+        gyRaw = gx;
+        gzRaw = gz * -1.00;
+
+        mxRaw = my;
+        myRaw = mx;
+        mzRaw = mz * -1.00;
+        break;
+
+      // convert sensor data from NED frame to NWU frame - 0
+      case 0: // NWU
+        axRaw = ax;
+        ayRaw = ay * -1.00;
+        azRaw = az * -1.00;
+
+        gxRaw = gx;
+        gyRaw = gy * -1.00;
+        gzRaw = gz * -1.00;
+
+        mxRaw = mx;
+        myRaw = my * -1.00;
+        mzRaw = mz * -1.00;
+        break;
+      }
+      //----------------------------------------------------------------------------//
+
+      //---------------CALIBRATE SENSOR DATA-----------------//
+      // calibrate acc data
+      axCal = axRaw - axOff;
+      ayCal = ayRaw - ayOff;
+      azCal = azRaw - azOff;
+
+      // calibrate gyro data
+      gxCal = gxRaw - gxOff;
+      gyCal = gyRaw - gyOff;
+      gzCal = gzRaw - gzOff;
+
+      // calibrate mag data
       // magCal = A_1*(magRaw - b) using the A matrix and b vector to remove the magnetic offsets
       mag_vect[0] = mxRaw;
       mag_vect[1] = myRaw;
@@ -147,9 +184,10 @@ void loop()
       mxCal = mag_vect[0];
       myCal = mag_vect[1];
       mzCal = mag_vect[2];
-      //---------------------------------------------------//
+      //-----------------------------------------------------//
 
-      //------------- APPLY MADWICK FILTER IN NWU FRAME -----------------//
+      //------------- APPLY MADWICK FILTER -----------------//
+      // filter is updated based on the choosen world frame
       float _ax = axCal;
       float _ay = ayCal;
       float _az = azCal;

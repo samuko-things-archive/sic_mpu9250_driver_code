@@ -107,8 +107,6 @@ void compensateMagneticDistortion(float q0, float q1, float q2,
 
 
 
-
-
 MadgwickFilter::MadgwickFilter()
 {
   gain_ = 0.0;
@@ -122,80 +120,104 @@ MadgwickFilter::MadgwickFilter()
 }
 
 
+
 void MadgwickFilter::madgwickAHRSupdate(float gx, float gy, float gz, float ax,
-                                   float ay, float az, float mx, float my,
-                                   float mz)
+                                        float ay, float az, float mx, float my,
+                                        float mz)
 {
-    float s0, s1, s2, s3;
-    float qDot1, qDot2, qDot3, qDot4;
-    float _2bz, _2bxy;
+  float s0, s1, s2, s3;
+  float qDot1, qDot2, qDot3, qDot4;
+  float _2bz, _2bxy;
 
-    // // Use IMU algorithm if magnetometer measurement invalid (avoids NaN in
-    // // magnetometer normalisation)
-    // if ((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f))
-    // {
-    //     madgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az);
-    //     return;
-    // }
+  // // Use IMU algorithm if magnetometer measurement invalid (avoids NaN in
+  // // magnetometer normalisation)
+  // if ((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f))
+  // {
+  //   madgwickAHRSupdateIMU(gx, gy, gz, ax, ay, az);
+  //   return;
+  // }
 
-    float dt = (float)(micros() - last_time_)/ 1.0e6;
-    // Compute feedback only if accelerometer measurement valid (avoids NaN in
-    // accelerometer normalisation)
-    if (!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))
+  float dt = (float)(micros() - last_time_) / 1.0e6;
+  // Compute feedback only if accelerometer measurement valid (avoids NaN in
+  // accelerometer normalisation)
+  if (!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))
+  {
+    // Normalise accelerometer measurement
+    normalizeVector(ax, ay, az);
+
+    // Normalise magnetometer measurement
+    normalizeVector(mx, my, mz);
+
+    // Compensate for magnetic distortion
+    compensateMagneticDistortion(q0, q1, q2, q3, mx, my, mz, _2bxy, _2bz);
+
+    // Gradient decent algorithm corrective step
+    s0 = 0.0;
+    s1 = 0.0;
+    s2 = 0.0;
+    s3 = 0.0;
+    switch (world_frame_id)
     {
-        // Normalise accelerometer measurement
-        normalizeVector(ax, ay, az);
+    case 0: // 0 - NWU
+      // Gravity: [0, 0, 1]
+      addGradientDescentStep(q0, q1, q2, q3, 0.0, 0.0, 2.0, ax, ay,
+                             az, s0, s1, s2, s3);
 
-        // Normalise magnetometer measurement
-        normalizeVector(mx, my, mz);
+      // Earth magnetic field: = [bxy, 0, bz]
+      addGradientDescentStep(q0, q1, q2, q3, _2bxy, 0.0, _2bz, mx, my,
+                             mz, s0, s1, s2, s3);
+      break;
+    case 1: // 1 - ENU
+      // Gravity: [0, 0, 1]
+      addGradientDescentStep(q0, q1, q2, q3, 0.0, 0.0, 2.0, ax, ay,
+                             az, s0, s1, s2, s3);
 
-        // Compensate for magnetic distortion
-        compensateMagneticDistortion(q0, q1, q2, q3, mx, my, mz, _2bxy, _2bz);
+      // Earth magnetic field: = [0, bxy, bz]
+      addGradientDescentStep(q0, q1, q2, q3, 0.0, _2bxy, _2bz, mx, my,
+                             mz, s0, s1, s2, s3);
+      break;
+    case 2: // 2 - NED
+      // Gravity: [0, 0, -1]
+      addGradientDescentStep(q0, q1, q2, q3, 0.0, 0.0, -2.0, ax, ay,
+                             az, s0, s1, s2, s3);
 
-        // Gradient decent algorithm corrective step
-        s0 = 0.0;
-        s1 = 0.0;
-        s2 = 0.0;
-        s3 = 0.0;
-
-        //North West Up (NWU) Frane
-        // Gravity: [0, 0, 1]
-        addGradientDescentStep(q0, q1, q2, q3, 0.0, 0.0, 2.0, ax, ay,
-                                az, s0, s1, s2, s3);
-
-        // Earth magnetic field: = [bxy, 0, bz]
-        addGradientDescentStep(q0, q1, q2, q3, _2bxy, 0.0, _2bz, mx, my,
-                                mz, s0, s1, s2, s3);
-        
-        normalizeQuaternion(s0, s1, s2, s3);
-
-        orientationChangeFromGyro(q0, q1, q2, q3, gx, gy, gz, qDot1, qDot2,
-                                  qDot3, qDot4);
-
-        // Apply feedback step
-        qDot1 -= gain_ * s0;
-        qDot2 -= gain_ * s1;
-        qDot3 -= gain_ * s2;
-        qDot4 -= gain_ * s3;
-    } else
-    {
-        orientationChangeFromGyro(q0, q1, q2, q3, gx, gy, gz, qDot1, qDot2,
-                                  qDot3, qDot4);
+      // Earth magnetic field: = [bxy, 0, bz]
+      addGradientDescentStep(q0, q1, q2, q3, _2bxy, 0.0, _2bz, mx, my,
+                             mz, s0, s1, s2, s3);
+      break;
     }
+    normalizeQuaternion(s0, s1, s2, s3);
 
-    // Integrate rate of change of quaternion to yield quaternion
-    q0 += qDot1 * dt;
-    q1 += qDot2 * dt;
-    q2 += qDot3 * dt;
-    q3 += qDot4 * dt;
+    // compute gyro drift bias
+    orientationChangeFromGyro(q0, q1, q2, q3, gx, gy, gz, qDot1, qDot2,
+                              qDot3, qDot4);
 
-    // Normalise quaternion
-    normalizeQuaternion(q0, q1, q2, q3);
+    // Apply feedback step
+    qDot1 -= gain_ * s0;
+    qDot2 -= gain_ * s1;
+    qDot3 -= gain_ * s2;
+    qDot4 -= gain_ * s3;
+  }
+  else
+  {
+    orientationChangeFromGyro(q0, q1, q2, q3, gx, gy, gz, qDot1, qDot2,
+                              qDot3, qDot4);
+  }
 
-    computeRPY();
+  // Integrate rate of change of quaternion to yield quaternion
+  q0 += qDot1 * dt;
+  q1 += qDot2 * dt;
+  q2 += qDot3 * dt;
+  q3 += qDot4 * dt;
 
-    last_time_ = micros();
+  // Normalise quaternion
+  normalizeQuaternion(q0, q1, q2, q3);
+
+  computeRPY();
+
+  last_time_ = micros();
 }
+
 
 
 // void MadgwickFilter::madgwickAHRSupdateIMU(float gx, float gy, float gz, float ax,
