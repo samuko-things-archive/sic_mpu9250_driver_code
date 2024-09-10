@@ -45,6 +45,7 @@ const byte AZ_VAR_EEPROM_ADDRESS = 108;
 
 const byte I2C_EEPROM_ADDRESS = 112;
 const byte GAIN_EEPROM_ADDRESS = 116;
+const byte FRAME_ID_EEPROM_ADDRESS = 120;
 //-----------------------------------------//
 
 float get_EEPROM_data(byte EEPROM_ADDRESS)
@@ -73,7 +74,9 @@ void set_EEPROM_data(byte EEPROM_ADDRESS, int input_data, int &global_data)
   global_data = (int)data;
 
   if (EEPROM_ADDRESS == I2C_EEPROM_ADDRESS)
-    Wire.begin(i2cAddress);
+    Wire.begin(global_data);
+  else if (EEPROM_ADDRESS == FRAME_ID_EEPROM_ADDRESS)
+    madgwickFilter.setWorldFrameId(global_data);
 }
 
 //////////////////////////////////////////////////////
@@ -131,7 +134,8 @@ void resetAllParams()
   set_EEPROM_data(AZ_VAR_EEPROM_ADDRESS, 0.00, azOff);
 
   set_EEPROM_data(GAIN_EEPROM_ADDRESS, 0.1, filterGain);
-  set_EEPROM_data(I2C_EEPROM_ADDRESS, 104, i2cAddress); // 0x68
+  set_EEPROM_data(I2C_EEPROM_ADDRESS, 104, i2cAddress);    // 0x68
+  set_EEPROM_data(FRAME_ID_EEPROM_ADDRESS, 2, i2cAddress); // 0 - NWU,  1 - ENU,  2 - NED
 }
 
 void initEEPROMparamsStorage()
@@ -188,8 +192,11 @@ void updateGlobalParamsFromEERPOM()
 
   filterGain = get_EEPROM_data(GAIN_EEPROM_ADDRESS);
 
-  float adddress = get_EEPROM_data(I2C_EEPROM_ADDRESS);
-  i2cAddress = (int)adddress;
+  float address = get_EEPROM_data(I2C_EEPROM_ADDRESS);
+  i2cAddress = (int)address;
+
+  float world_frame_id = get_EEPROM_data(FRAME_ID_EEPROM_ADDRESS);
+  worldFrameId = (int)world_frame_id;
 }
 /////////////////////////////////////////////////////////////
 

@@ -17,7 +17,9 @@ class MadgwickFilter
 
   private:
     // **** paramaters
-    double gain_ = 1.0;                         // algorithm gain
+    double gain_ = 1.0;  // algorithm gain
+    const String world_frame[3] = {"NWU", "ENU", "NED"}; // NWU, ENU, NED
+    int world_frame_id;  // 0 - NWU, 1 - ENU, 2 - NED
 
     float roll;
     float pitch;
@@ -35,6 +37,11 @@ class MadgwickFilter
          Higher values lead to faster convergence but more noise.
          Lower values lead to slower convergence but smoother signal.*/
         gain_ = gain;
+    }
+
+    void setWorldFrameId(int id)
+    {
+      world_frame_id = id;
     }
 
     void computeRPY(){
