@@ -65,11 +65,11 @@ void setup()
   madgwickFilter.setWorldFrameId(worldFrameId); // 0 - NWU,  1 - ENU,  2 - NED
 
   onLed0();
-  delay(800);
+  delay(500);
   offLed0();
-  delay(400);
+  delay(500);
   onLed1();
-  delay(800);
+  delay(500);
   offLed1();
 
   serialCommTime = millis();

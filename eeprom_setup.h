@@ -135,7 +135,7 @@ void resetAllParams()
 
   set_EEPROM_data(GAIN_EEPROM_ADDRESS, 0.1, filterGain);
   set_EEPROM_data(I2C_EEPROM_ADDRESS, 104, i2cAddress);    // 0x68
-  set_EEPROM_data(FRAME_ID_EEPROM_ADDRESS, 2, i2cAddress); // 0 - NWU,  1 - ENU,  2 - NED
+  set_EEPROM_data(FRAME_ID_EEPROM_ADDRESS, 0, worldFrameId); // 0 - NWU,  1 - ENU,  2 - NED
 }
 
 void initEEPROMparamsStorage()
