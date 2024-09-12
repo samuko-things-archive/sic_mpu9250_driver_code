@@ -39,6 +39,7 @@ void offLed1()
 String resetEEPROM()
 {
   setFIRST_TIME(0);
+  updateGlobalParamsFromEERPOM();
   return "1";
 }
 

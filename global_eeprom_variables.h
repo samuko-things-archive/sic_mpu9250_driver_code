@@ -74,8 +74,8 @@ float qz = 0.00;
 
 //---------------------------------------------------//
 int i2cAddress = 104; // 0x68
-float filterGain = 0.1;
-int worldFrameId = 0; // 0 - NWU,  1 - ENU,  2 - NED
+float filterGain = 1.0;
+int worldFrameId = 1; // 0 - NWU,  1 - ENU,  2 - NED
 //---------------------------------------------------//
 
 #endif
